@@ -221,14 +221,14 @@ async function handleGenCommand(target, user, category, source) {
   writeInventoryFile(selectedFile.filePath, lines);
   const remaining = lines.length;
 
-  const successEmbed = createEmbed({
+  const itemEmbed = createEmbed({
     title: 'Item Generated',
     description: `You received: \`${generatedItem}\`\n\nRemaining stock for \`${category}\`: ${remaining}`,
     icon: '✅',
     color: 0x2ecc71
   });
 
-  const dmResult = await trySendDm(user, successEmbed);
+  const dmResult = await trySendDm(user, itemEmbed);
   if (config.dmResults && !dmResult.sent) {
     await sendEmbed(target, createEmbed({
       title: 'DM Failed',
@@ -236,10 +236,21 @@ async function handleGenCommand(target, user, category, source) {
       icon: '📬',
       color: 0xe67e22
     }));
+    console.log(`[GEN] ${user.tag} -> ${category} | remaining: ${remaining} | dmFailed: ${dmResult.reason}`);
     return;
   }
 
-  await sendEmbed(target, successEmbed);
+  if (config.dmResults) {
+    await sendEmbed(target, createEmbed({
+      title: 'Check Your DMs',
+      description: `Your generated item has been sent to your direct messages.`,
+      icon: '📬',
+      color: 0x2ecc71
+    }));
+  } else {
+    await sendEmbed(target, itemEmbed);
+  }
+
   console.log(`[GEN] ${user.tag} -> ${category} | remaining: ${remaining}`);
 }
 
